@@ -28,7 +28,7 @@
                         <a href="index.html" class="nav-link text-dark fs-5">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a href="Contact.html" class="nav-link text-dark fs-5" >Contact</a>
+                        <a href="Contact.html" class="nav-link text-dark fs-5">Contact</a>
                     </li>
                     <li class="nav-item">
                         <a href="card.html" class="nav-link text-dark fs-5">Cart</a>
@@ -38,7 +38,7 @@
                     <input type="text" id="searchbox" class="p-1" placeholder="Search Products">
                 </div>
 
-        
+
                 <div class="d-flex ms-auto gap-4" id="auth-Buttons">
                     <a href="login.html" class="btn btn-outline-primary">Login</a>
                     <a href="resister.html" class="btn btn-primary">Register</a>
@@ -141,32 +141,31 @@
         </div>
     </footer>
     <script>
-        let  allProducts = []
+        let allProducts = []
         async function fetchProducts() {
             try {
                 const response = await fetch('https://dummyjson.com/products?limit=100');
                 const data = await response.json();
-                const allProducts = data.products;
+                allProducts = data.products;  // Remove 'const' here
                 displayProducts(allProducts);
-                generateFilterButtons(allProducts)
+                generateFilterButtons(allProducts);
             } catch (error) {
                 console.error("Error fetching products:", error);
             }
         }
+
         function displayProducts(products) {
             const productList = document.getElementById('product-list');
             productList.innerHTML = '';
-
             products.forEach(product => {
                 const productCard = document.createElement('div');
                 productCard.className = 'col-md-5 col-lg-4 p-5 mb-4';
-
                 productCard.innerHTML = `
             <div class="card shadow-lg p-4">
-                <img src="${product.thumbnail}" class="card-img-top" alt="not Loaded.." style="object-fit:contain;" height="200vh"> 
+                <img src="${product.thumbnail || 'default-image.jpg'}" class="card-img-top" alt="not Loaded.." style="object-fit:contain;" height="200vh">
                 <div class="card-body">
                     <h4 class="card-title">${product.title}</h4>
-                    <p class="card-text">${product.description}</p>
+                    <p class="card-text">${product.description || 'No description available'}</p>
                     <h4 class="card-text"><strong>Price: </strong>$ ${product.price}</h4>
                     <button class="btn btn-success">Add To Cart</button>
                     <button class="btn btn-primary">View Details</button>
@@ -177,34 +176,40 @@
             });
         }
 
+
         function generateFilterButtons(allProducts) {
             const filterButtonsContainer = document.getElementById('filter-buttons-container');
             filterButtonsContainer.innerHTML = '';
             const categories = allProducts.reduce((acc, product) => {
-                if (!acc.includes(product.category)) {
-                    acc.push(product.category)
+                if (product.category && !acc.includes(product.category)) {
+                    acc.push(product.category);
                 }
                 return acc;
-            }, [])
+            }, []);
             function createButton(category) {
                 const button = document.createElement('button');
-                button.className = 'btn btn-outline-dark m-1'
+                button.className = 'btn btn-outline-dark m-1';
                 button.textContent = category.charAt(0).toUpperCase() + category.slice(1);
                 button.setAttribute('data-category', category);
                 button.addEventListener('click', () => {
-                    displayProducts(category === 'all' ? allProducts : allProducts.filter(product => product.category === category))
-                })
+                    displayProducts(category === 'all' ? allProducts : allProducts.filter(product => product.category === category));
+                });
                 filterButtonsContainer.appendChild(button);
             }
             createButton('all');
             categories.forEach(createButton);
         }
 
-        document.getElementById("searchbox").addEventListener('input',function(){
-           const query  =  this.value.toLowerCase();
-         const filterprod =  allProducts.filter(product=> product.title.toLowerCase().includes(query) || product.description.toLowerCase().includes(query));
-         displayProducts(filterprod)
-        })
+        document.getElementById("searchbox").addEventListener('input', function () {
+            const query = this.value.toLowerCase();
+            if (allProducts.length > 0) {
+                const filterprod = allProducts.filter(product =>
+                    product.title.toLowerCase().includes(query) || product.description.toLowerCase().includes(query)
+                );
+                displayProducts(filterprod);
+            }
+        });
+
         fetchProducts();
 
     </script>
